@@ -17,20 +17,16 @@ CONTENTS OF THE DISTRIBUTUION PACKAGE
 	To install the app, open RAPID.EXE or RAPID.DMG and follow the installation steps. Once completed, RAPID can be run as any software installed on the machine.
 
 /src
-	The individual files needed to run Document Towers. To install them click the Set Path button in the Environment panel of the Home tab in the Matlab window, and add the folders to the path:
-		/3p/io/jsonlab-2.0
-		/3p/io/xml_io_tools
-		/3p/matlab/uitools/multiWaitbar
-		/code/gx/docviz/towers/
-		/code/gx/docviz/towers/colormaps
-		/code/gx/docviz/towers/extract_geo
-		/code/gx/docviz/towers/gui
+	This folder contains the source code for RAPID. The source file is RAPID.mlapp which can be edited in AppDesigner in MATLAB. The folder 'demo data' contains 
+		/classes
+		/images
+		RAPID_v1.mlapp
 
 /docs/help
 	Open in a web browser the file index.html found in this folder to read the software documentation.
 
-/docs/demo
-	Demonstration files with document geometry data. For details read the file readme.txt found in the demo folder.
+/docs/demo data
+	Contains the demonstration data that mimic the demonstration video with the associated research manuscript.
 
 
 ———————————————
