@@ -12,9 +12,9 @@ CONTENTS OF THE DISTRIBUTUION PACKAGE
 ———————————————
 
 /install
-	Contains the executable installation files for MacOS and Windows.  
+	Contains the executable installation files for Windows.  
 
-	To install the app, open RAPID.EXE or RAPID.DMG and follow the installation steps. Once completed, RAPID can be run as any software installed on the machine.
+	To install the app, open RAPID.EXE and follow the installation steps. Once completed, RAPID can be run as any software installed on the machine.
 
 /src
 	This folder contains the source code for RAPID. The source file is RAPID.mlapp which can be edited in AppDesigner in MATLAB. The folder 'demo data' contains 
