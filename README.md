@@ -23,7 +23,7 @@ CONTENTS OF THE DISTRIBUTUION PACKAGE
 		RAPID_v1.mlapp
 
 /docs/help
-	Open in a web browser the file index.html found in this folder to read the software documentation.
+	..
 
 /docs/demo data
 	Contains the demonstration data that mimic the demonstration video with the associated research manuscript.
