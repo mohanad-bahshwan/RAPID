@@ -17,7 +17,7 @@ CONTENTS OF THE DISTRIBUTUION PACKAGE
 	To install the app, open RAPID.EXE and follow the installation steps. Once completed, RAPID can be run as any software installed on the machine.
 
 /src
-	This folder contains the source code for RAPID. The source file is RAPID_v1.mlapp which can be edited in AppDesigner in MATLAB. The folder 'demo data' contains 
+	This folder contains the source code for RAPID. The source file is RAPID_v1_SourceCode.mlapp which can be edited in AppDesigner in MATLAB. The folder 'demo data' contains 
 		/classes
 		/images
 		RAPID_v1.mlapp
