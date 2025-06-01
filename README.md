@@ -1,6 +1,6 @@
-—----——————————————
-R   A   P   I   D
-—----——————————————
+#—----——————————————
+#R   A   P   I   D
+#—----——————————————
 
 RAPID stands for robust analysis and processing of image data. It is an executable software tool with which a user can input images, perform object segmentation, and obtain a tabulated data characterizing all objects within the image.
 
