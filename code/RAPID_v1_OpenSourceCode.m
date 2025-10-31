@@ -228,7 +228,7 @@ classdef RAPID_v1_OpenSourceCode < matlab.apps.AppBase
 
     properties (Access = private)
         %---- PATH-related variables
-        fileNames, pathName
+        fileNames, pathName, lastPath
         %---- DATASTORES
         cleanedDatstore, rawImgDatastore
         greyScaleDatastore, binarizedDatastore, borderClearBinarizedDatastore
@@ -271,7 +271,7 @@ classdef RAPID_v1_OpenSourceCode < matlab.apps.AppBase
     end
 
     properties (Access = public)
-        scaleDataCollection = scaleFigCollection; % external class 
+        scaleDataCollection % initialize the UnitScale property
         activeState = struct();
         userPrefActiveState = struct();
         exportState = struct();
@@ -282,36 +282,67 @@ classdef RAPID_v1_OpenSourceCode < matlab.apps.AppBase
 
         function [fileName, pathName, fullFiles, index] = Browse(app,ext, multiBoo)
             %
-            % General function for importing files. The outputs are then
-            % parsed further by another function
-            % INPUTS: app (mandatory), ext (file extensions), multiBoo
-            % (boolean to allow/prevent multiselection)
-
+            % General file import function with path memory.
+            % Opens a file selection dialog starting from the last used folder.
+            % Updates the stored path after each successful selection.
+            %
+            % INPUTS:
+            %   app        - App instance (required)
+            %   ext        - File extension filter(s)
+            %   multiBoo   - Boolean flag to allow or prevent multiselection
+            %
+            % OUTPUTS:
+            %   fileName   - Selected file name(s)
+            %   pathName   - Path of the selected file(s)
+            %   fullFiles  - Full path(s) to the selected file(s)
+            %   index      - Output index from uigetfile
+            if isempty(app.lastPath) || ~isfolder(app.lastPath)
+                startPath = pwd;
+            else
+                startPath = app.lastPath;
+            end
             [fileName,pathName, index] = uigetfile(ext,'Select a file',...
-                'MultiSelect', multiBoo);
+                startPath,'MultiSelect', multiBoo);
+
+            if isequal(fileName, 0)
+                %fileName = [];
+                pathName = app.lastPath;
+                %fullFiles = [];
+                index = 0;
+            end
+
+            app.lastPath = pathName;
             fullFiles = fullfile(pathName,fileName);
             app.fileNames = fileName;
             app.pathName = pathName;
         end
 
 
-        function [fileName,pathName, status] = getFilePathGeneral(~, TargetTextField, FileExtensionConfig)
+        function [fileName,pathName, status] = getFilePathGeneral(app, TargetTextField, FileExtensionConfig)
             %
-            % Prompts the user to select a file and updates the target text field with the selected file's path.
+            % Opens a file selection dialog and updates the target text field with the chosen file path.
+            % Remembers the last used folder for subsequent selections.
+            %
             % INPUTS:
-            %   ~                   - (unused) placeholder for app
-            %   TargetTextField      - UI component (e.g., text field) to display the file path.
-            %   FileExtensionConfig  - File extension filter (e.g., '*.txt') for file selection.
+            %   app                 - App instance
+            %   TargetTextField     - UI component to display the selected file path
+            %   FileExtensionConfig - File extension filter (e.g., '*.txt')
             %
             % OUTPUTS:
-            %   fileName             - Name of the selected file.
-            %   pathName             - Path to the selected file.
-            %   status               - Status indicator (1 if a file is selected, 0 if canceled).
+            %   fileName            - Selected file name
+            %   pathName            - Path to the selected file
+            %   status              - Status flag (1 if a file is selected, 0 if canceled)
+            if isempty(app.lastPath) || ~isfolder(app.lastPath)
+                startPath = pwd;
+            else
+                startPath = app.lastPath;
+            end
             [fileName,pathName,status] = uigetfile(FileExtensionConfig,'Select a file',...
-                'MultiSelect', 'off');
+                startPath,'MultiSelect', 'off');
             if isequal(status,0) && isequal(fileName,0)
                 % Do nothing
             elseif isequal(status,1)
+                app.lastPath = pathName;
                 TargetTextField.Value = [pathName fileName];
             end
         end
@@ -3335,7 +3366,12 @@ classdef RAPID_v1_OpenSourceCode < matlab.apps.AppBase
         function StartupInitialization(app)
             %
             % initializes the app at startup
-
+            if isdeployed
+                addpath(genpath(fullfile(ctfroot,'classes')));
+            else
+                addpath(genpath(fullfile(fileparts(mfilename('fullpath')),'classes')));
+            end
+            app.scaleDataCollection = scaleFigCollection; % external class 
             fileDIR = strsplit(mfilename('fullpath'),filesep);
             fileDIR =cell2mat(cellfun(@(x) [x filesep],fileDIR(1:end-1),'UniformOutput',false));
             addpath(genpath(fileDIR));
@@ -3360,6 +3396,40 @@ classdef RAPID_v1_OpenSourceCode < matlab.apps.AppBase
             InitializeExportPrefs(app);
             app.DropDownCalib.Items = {'px','µm', 'nm', 'mm', 'cm', 'm', 'pm', 'Å'};
         end
+
+        function loadLastPath(app)
+            %
+            % Loads the previously used folder path from a stored file.
+            % If no file is found, initializes the path to the current working directory.
+            %
+            % INPUTS:
+            %   app       - App instance
+            %
+            % OUTPUTS:
+            %   (none)
+            filePath = fullfile(prefdir, 'MyApp_LastPath.mat');
+            if exist(filePath, 'file')
+                s = load(filePath, 'lastPath');
+                app.lastPath = s.lastPath;
+            else
+                app.lastPath = pwd;
+            end
+        end
+        function saveLastPath(app)
+            %
+            % Saves the current last used folder path to a persistent file.
+            % Used to restore the previous directory when the app is reopened.
+            %
+            % INPUTS:
+            %   app       - App instance
+            %
+            % OUTPUTS:
+            %   (none)
+            try
+                save(fullfile(prefdir, 'MyApp_LastPath.mat'), 'app', '-struct', 'app', 'lastPath');
+            catch
+            end
+        end
     end
 
     % Callbacks that handle component events
@@ -3369,6 +3439,7 @@ classdef RAPID_v1_OpenSourceCode < matlab.apps.AppBase
         function startupFcn(app)
             %Modular
             StartupInitialization(app);
+            loadLastPath(app);
             ValidateMenuItem(app,'homeTab');
         end
 
@@ -3503,6 +3574,7 @@ classdef RAPID_v1_OpenSourceCode < matlab.apps.AppBase
         function v10UIFigureCloseRequest(app, event)
             %Modular
             close all
+            saveLastPath(app);
             CloseHandle(app, 'figure', 'cropFigure');
             delete(app.v10UIFigure);
             delete(app);
@@ -3520,7 +3592,7 @@ classdef RAPID_v1_OpenSourceCode < matlab.apps.AppBase
         % Button pushed function: ButBrowseScale
         function ButBrowseScaleButtonPushed(app, event)
             %Modular
-            [~,~,imgSelectionState] = getFilePathGeneral(app, app.ScaleImgTB, {'*.jpg;*.bmp;*.tiff', 'Image Files (*.jpg;*.bmp;*.tiff)'});
+            [~,~,imgSelectionState] = getFilePathGeneral(app, app.ScaleImgTB, {'*.jpg;*.png;*.bmp;*.tiff', 'Image Files (*.jpg;*.png;*.bmp;*.tiff)'});
             if isequal(imgSelectionState, true); PrepareScaleCalibFigure(app);end
             focus(app.v10UIFigure);
         end
@@ -5408,7 +5480,7 @@ classdef RAPID_v1_OpenSourceCode < matlab.apps.AppBase
     methods (Access = public)
 
         % Construct app
-        function app = RAPID_v1_OpenSourceCode
+        function app = OPENIMG_READAPTED_V00035
 
             runningApp = getRunningApp(app);
 
