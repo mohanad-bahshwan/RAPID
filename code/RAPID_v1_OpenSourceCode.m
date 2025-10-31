@@ -1473,11 +1473,6 @@ classdef RAPID_v1_OpenSourceCode < matlab.apps.AppBase
                 cropSpinner.Enable = 'on';
             end
 
-
-
-
-
-
         end
 
         function CloseHandle(~, type, tagName)
@@ -2334,7 +2329,7 @@ classdef RAPID_v1_OpenSourceCode < matlab.apps.AppBase
                         app.binarizingThreshold = prefs.binarizingThreshold;
                         %---
                         [~, ~] = Initializesliders(app, prefs.shape, app.strelDim1, app.strelDim2, app.binarizingThreshold);
-                        app.DropDownObjectShape.Value = app.strelShape;
+                        app.DropDownObjectShape.Value = AvoidShapeErrorReversed(app,app.strelShape);
                         app.morphStructElement = Createstrel(app,app.strelShape, app.strelDimensionalParams, app.strelShapeFamily);
                         Createstrel(app,app.strelShape, app.strelDimensionalParams, app.strelShapeFamily);
 
@@ -2435,6 +2430,21 @@ classdef RAPID_v1_OpenSourceCode < matlab.apps.AppBase
                 % do nothing
             end
         end
+
+        function shape = AvoidShapeErrorReversed(~,shape)
+            %
+            % Prevents error if shape 'disk' is selected due to 'default'
+            % text being written in the dropdown field
+            %
+            % Inputs:
+            %   shape - the shape of the morphological operator
+
+            if strcmp(shape, 'disk')
+                shape = 'disk (default)';
+            else
+                % do nothing
+            end
+        end        
 
         function ToggleSwitch(~, button, state)
             %
@@ -4063,7 +4073,7 @@ classdef RAPID_v1_OpenSourceCode < matlab.apps.AppBase
             % Create Image
             app.Image = uiimage(app.homeTab);
             app.Image.ScaleMethod = 'scaledown';
-            app.Image.BackgroundColor = [0.4941 0.1843 0.5569];
+            app.Image.BackgroundColor = [0.9412 0.9412 0.9412];
             app.Image.Position = [-5 89 1047 473];
             app.Image.ImageSource = fullfile(pathToMLAPP, 'images', 'HomeScreen5.png');
 
@@ -5480,7 +5490,7 @@ classdef RAPID_v1_OpenSourceCode < matlab.apps.AppBase
     methods (Access = public)
 
         % Construct app
-        function app = OPENIMG_READAPTED_V00035
+        function app = RAPID
 
             runningApp = getRunningApp(app);
 
