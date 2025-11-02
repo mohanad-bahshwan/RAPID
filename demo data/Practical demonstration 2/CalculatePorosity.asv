@@ -1,0 +1,59 @@
+%% clean up
+clc, close all, clear all
+
+% Add path
+addpath(genpath('results/Preferences'));
+
+%%
+T = readtable('results/data.csv');
+load('Preferences/Preferences.mat')
+scaleFactor = prefs.scaleDataCollection.conversionFactor;
+
+%% 
+Tclean = T(T.BorderObject ~= 1, :);
+
+
+% Mean and standard deviation for each file name
+UniqueFiles = unique(Tclean.FileName);% get all unique file names
+meanArea = arrayfun(@(x) mean(Tclean.Area(strcmp(Tclean.FileName, x))), UniqueFiles)
+stdArea = arrayfun(@(x) std(Tclean.Area(strcmp(Tclean.FileName, x))), UniqueFiles)
+
+
+f = figure;
+boxplot(Tclean.Area, 'Symbol', 'o', 'Orientation', 'vertical',...
+    'BoxStyle','outline', 'Colors',[0 0 0], 'MedianStyle','target',...
+    'Widths', 0.25, 'LabelVerbosity','all');
+ylabel('Porosity area (\mum^2)');
+xlabel('');
+ax = gca;
+ax.XTick = []
+f.Position = [407   241   431   557];
+set(gca, 'YScale', 'log')
+ax.XLim = [0.8323    1.8323];
+ax.YLim = [1 100000];
+
+% Mean and standard deviation for all files combined
+overallMean = mean(Tclean.Area)      % mean of all rows
+overallStd  = std(Tclean.Area)       % standard deviation of all rows
+median(Tclean.Area)
+
+%% % Scatter plot to visualize relation between Area and ConvexArea
+close all
+f=figure;
+scatter(Tclean.Area, Tclean.ConvexArea, 40, Tclean.Solidity, 'filled', 'MarkerFaceAlpha',0.5);
+xlabel('Area (µm^2)');
+ylabel('Convex Area (µm^2)');
+title('');
+colorbar;
+colormap winter;
+c = colorbar;
+c.Label.String = 'Solidity';
+
+% Optional: identity line for perfect convex shapes
+hold on;
+plot([min(Tclean.Area)-3 max(Tclean.Area)+3000], [min(Tclean.Area)-3 max(Tclean.Area)+3000], 'k--');
+legend('','Perfect convexity','Location','northwest');
+set(gca, 'XScale', 'log')
+set(gca, 'YScale', 'log')
+f.Position = [953   536   476   306];
+

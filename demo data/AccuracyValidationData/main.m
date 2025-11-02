@@ -5,21 +5,29 @@ close all, clc
 % Constants and Setup
 %==========================================================================
 
-% NOTE: You must load mStruct first
-% The dataset is assumed to contain a 6x11 grid of squares.
+% The dataset contains a 6x11 grid of squares.
 % This script analyzes 10 pairs of elements per row (1:10).
 
-% um2pxFactor: Conversion factor from micrometers (um) to pixels (px).
-% This is derived from the microscope's calibrated resolution.
-um2pxFactor = 1/0.064265;
 
 %==========================================================================
 % Data Loading and Preparation
 %==========================================================================
 
+% Setup path
+addpath(genpath(pwd));
+
+% Load the mstruct file
+load('mstruct.mat');
+
 % Convert the input structure 'mStruct'
 % to a table for easier data manipulation.
 dataTable = struct2table(mStruct);
+
+% Load the preferences file from the previous run:
+load('Preferences.mat');
+
+% um2pxFactor: Conversion factor from micrometers (um) to pixels (px).
+um2pxFactor = 1/(prefs.scaleDataCollection.conversionFactor);
 
 % Load the binary mask image (e.g., for validation or overlay).
 bwimg = imread("B_.png");
